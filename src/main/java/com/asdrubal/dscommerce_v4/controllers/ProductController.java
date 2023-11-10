@@ -5,8 +5,11 @@ import com.asdrubal.dscommerce_v4.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -15,9 +18,9 @@ public class ProductController {
     @Autowired
     private ProductService service;
     @GetMapping(value = "/{id}")
-    public ProductDTO findById(@PathVariable Long id){
+    public ResponseEntity<ProductDTO> findById(@PathVariable Long id){
         ProductDTO dto = service.findById(id);
-        return dto;
+        return ResponseEntity.ok(dto);
     }
 //      Busca apresenta todos os itens do db
 //    @GetMapping
@@ -27,14 +30,25 @@ public class ProductController {
 
     //  Busca páginada
     @GetMapping
-    public Page<ProductDTO> findAll(Pageable pageable){
-        return service.findAll(pageable);
+    public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable){
+        Page<ProductDTO> dto = service.findAll(pageable);
+        return ResponseEntity.ok(dto);
     }
-//      Inserindo um novo produto
     @PostMapping
-    public ProductDTO insert(@RequestBody ProductDTO dto){
+    public ResponseEntity<ProductDTO> insert(@RequestBody ProductDTO dto){
         dto = service.insert(dto);
-        return dto;
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path(("/{id}")).buildAndExpand(dto.getId()).toUri();
+        return ResponseEntity.created(uri).body(dto);
+    }
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @RequestBody ProductDTO dto){
+        dto = service.update(id, dto);
+        return ResponseEntity.ok(dto);
+    }
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
 
