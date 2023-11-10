@@ -3,6 +3,7 @@ package com.asdrubal.dscommerce_v4.services;
 import com.asdrubal.dscommerce_v4.dto.ProductDTO;
 import com.asdrubal.dscommerce_v4.entities.Product;
 import com.asdrubal.dscommerce_v4.repositories.ProductRepository;
+import com.asdrubal.dscommerce_v4.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,13 +20,17 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
-        Optional<Product> result = repository.findById(id);
-        if (result.isPresent()) {
-            Product product = result.get();
-            ProductDTO dto = new ProductDTO(product);
-            return dto;
-        }
-        return null;
+        Product product = repository.findById(id).orElseThrow(
+                ()-> new ResourceNotFoundException("Recurso não encontrado")
+        );
+        return new ProductDTO(product);
+//        Optional<Product> result = repository.findById(id);
+//        if (result.isPresent()) {
+//            Product product = result.get();
+//            ProductDTO dto = new ProductDTO(product);
+//            return dto;
+//        }
+//        return null;
     }
 
     //      Service para uma busca que retorna todos os elementos
